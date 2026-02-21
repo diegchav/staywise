@@ -72,7 +72,7 @@ public class BookingService {
                 throw new IllegalStateException(ErrorMessages.INVENTORY_SOLD_OUT);
             }
 
-            inventory.decrement();
+            inventory.incrementReservedRooms();
         }
 
         // Calculate total price based on base price.

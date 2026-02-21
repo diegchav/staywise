@@ -1,5 +1,6 @@
 package com.diegchav.staywise.domain;
 
+import com.diegchav.staywise.constant.ErrorMessages;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,30 +14,34 @@ public class RoomInventory {
     @JoinColumn(name = "room_type_id")
     private RoomType roomType;
 
-    @Column(name = "available_rooms", nullable = false)
-    private int availableRooms;
+    @Column(name = "total_rooms", nullable = false)
+    private int totalRooms;
+
+    @Column(name = "reserved_rooms", nullable = false)
+    private int reservedRooms;
 
     protected RoomInventory() {}
 
     public RoomInventory(
             RoomType roomType,
             RoomInventoryId id,
-            int availableRooms
+            int totalRooms
     ) {
         this.roomType = roomType;
         this.id = id;
-        this.availableRooms = availableRooms;
+        this.totalRooms = totalRooms;
+        this.reservedRooms = 0;
     }
 
     public int getAvailableRooms() {
-        return availableRooms;
+        return totalRooms - reservedRooms;
     }
 
-    public void decrement() {
-        if (availableRooms <= 0) {
-            throw new IllegalStateException("No availability");
+    public void incrementReservedRooms() {
+        if (getAvailableRooms() <= 0) {
+            throw new IllegalStateException(ErrorMessages.INVENTORY_EMPTY);
         }
 
-        availableRooms--;
+        reservedRooms++;
     }
 }
