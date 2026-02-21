@@ -7,7 +7,7 @@ import com.diegchav.staywise.repository.BookingRepository;
 import com.diegchav.staywise.repository.HotelRepository;
 import com.diegchav.staywise.repository.RoomInventoryRepository;
 import com.diegchav.staywise.repository.RoomTypeRepository;
-import com.diegchav.staywise.service.BookingService;
+import com.diegchav.staywise.service.BookingOrchestratorService;
 import com.diegchav.staywise.testdata.TestDataFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -42,7 +42,7 @@ class BookingConcurrencyTest {
     }
 
     @Autowired
-    BookingService bookingService;
+    BookingOrchestratorService bookingService;
 
     @Autowired
     HotelRepository hotelRepository;
@@ -129,7 +129,7 @@ class BookingConcurrencyTest {
                         LocalDate.now().plusDays(1) // book a single day
                 );
 
-                bookingService.createBooking(bookingRequest);
+                bookingService.createBooking(UUID.randomUUID().toString(), bookingRequest);
 
             } catch (Exception ex) {
                 // no-op

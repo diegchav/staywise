@@ -4,8 +4,10 @@ import com.diegchav.staywise.api.dto.BookingResponse;
 import com.diegchav.staywise.api.dto.CreateBookingRequest;
 import com.diegchav.staywise.constant.ErrorMessages;
 import com.diegchav.staywise.domain.Booking;
+import com.diegchav.staywise.domain.IdempotencyKey;
 import com.diegchav.staywise.mapper.BookingMapper;
 import com.diegchav.staywise.repository.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,17 +17,19 @@ import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
 public class BookingService {
+    private final IdempotencyRepository idempotencyRepository;
     private final HotelRepository hotelRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final RoomInventoryRepository inventoryRepository;
     private final BookingRepository bookingRepository;
 
     public BookingService(
-            HotelRepository hotelRepository,
+            IdempotencyRepository idempotencyRepository, HotelRepository hotelRepository,
             RoomTypeRepository roomTypeRepository,
             RoomInventoryRepository inventoryRepository,
             BookingRepository bookingRepository
     ) {
+        this.idempotencyRepository = idempotencyRepository;
         this.hotelRepository = hotelRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.inventoryRepository = inventoryRepository;
@@ -33,10 +37,22 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponse createBooking(CreateBookingRequest request) {
+    protected BookingResponse createBooking(
+            String idempotencyKey,
+            CreateBookingRequest request
+    ) {
+        var existing = idempotencyRepository.findByIdempotencyKey(idempotencyKey);
+        if (existing.isPresent()) {
+            return existing.get().getResponseBody();
+        }
+
         var booking = persistBooking(request);
 
-        return BookingMapper.from(booking, request.hotelId(), request.roomTypeId());
+        var response = BookingMapper.from(booking, request.hotelId(), request.roomTypeId());
+
+        persistIdempotencyKey(idempotencyKey, response);
+
+        return response;
     }
 
     private Booking persistBooking(CreateBookingRequest request) {
@@ -65,5 +81,15 @@ public class BookingService {
 
         var booking = BookingMapper.toBooking(request, hotel, roomType, totalPrice);
         return bookingRepository.save(booking);
+    }
+
+    private void persistIdempotencyKey(String idempotencyKey, BookingResponse response) {
+        var idempotency = new IdempotencyKey(
+                idempotencyKey,
+                response,
+                HttpStatus.OK.value()
+        );
+
+        idempotencyRepository.saveAndFlush(idempotency);
     }
 }
