@@ -6,3 +6,7 @@ spring:
     url: jdbc:postgresql://localhost:5432/staywise
     username: postgres
     password: postgres
+
+springdoc:
+  swagger-ui:
+    url: /openapi.yaml
