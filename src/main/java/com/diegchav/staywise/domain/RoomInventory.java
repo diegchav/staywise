@@ -9,11 +9,6 @@ public class RoomInventory {
     @EmbeddedId
     private RoomInventoryId id;
 
-    @MapsId("roomTypeId")
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "room_type_id")
-    private RoomType roomType;
-
     @Column(name = "total_rooms", nullable = false)
     private int totalRooms;
 
@@ -23,11 +18,9 @@ public class RoomInventory {
     protected RoomInventory() {}
 
     public RoomInventory(
-            RoomType roomType,
             RoomInventoryId id,
             int totalRooms
     ) {
-        this.roomType = roomType;
         this.id = id;
         this.totalRooms = totalRooms;
         this.reservedRooms = 0;

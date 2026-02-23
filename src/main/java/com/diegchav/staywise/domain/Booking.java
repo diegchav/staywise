@@ -16,13 +16,11 @@ public class Booking {
     @Column(nullable = false)
     private UUID userId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "hotel_id", nullable = false)
-    private Hotel hotel;
+    @Column(name = "room_type_id", nullable = false)
+    private UUID roomTypeId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "room_type_id", nullable = false)
-    private RoomType roomType;
+    @Column(name = "hotel_id", nullable = false)
+    private UUID hotelId;
 
     @Column(name = "check_in", nullable = false)
     private LocalDate checkIn;
@@ -44,15 +42,16 @@ public class Booking {
 
     public Booking(
             UUID userId,
-            Hotel hotel,RoomType roomType,
+            UUID roomTypeId,
+            UUID hotelId,
             LocalDate checkIn,
             LocalDate checkOut,
             BigDecimal totalPrice
     ) {
         this.id = UUID.randomUUID();
         this.userId = userId;
-        this.hotel = hotel;
-        this.roomType = roomType;
+        this.roomTypeId = roomTypeId;
+        this.hotelId = hotelId;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
         this.status = BookingStatus.CONFIRMED;

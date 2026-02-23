@@ -3,8 +3,6 @@ package com.diegchav.staywise.mapper;
 import com.diegchav.staywise.api.dto.BookingResponse;
 import com.diegchav.staywise.api.dto.CreateBookingRequest;
 import com.diegchav.staywise.domain.Booking;
-import com.diegchav.staywise.domain.Hotel;
-import com.diegchav.staywise.domain.RoomType;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -32,14 +30,12 @@ public class BookingMapper {
 
     public static Booking toBooking(
             CreateBookingRequest request,
-            Hotel hotel,
-            RoomType roomType,
             BigDecimal totalPrice
     ) {
         return new Booking(
                 request.userId(),
-                hotel,
-                roomType,
+                request.roomTypeId(),
+                request.hotelId(),
                 request.checkIn(),
                 request.checkOut(),
                 totalPrice

@@ -12,9 +12,8 @@ public class RoomType {
     @Id
     private UUID id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "hotel_id", nullable = false)
-    private Hotel hotel;
+    @Column(name = "hotel_id", nullable = false)
+    private UUID hotelId;
 
     @Column(nullable = false)
     private String name;
@@ -33,9 +32,9 @@ public class RoomType {
 
     protected RoomType() {}
 
-    public RoomType(UUID id, Hotel hotel, String name, int capacity, int totalRooms, BigDecimal basePrice) {
+    public RoomType(UUID id, UUID hotelId, String name, int capacity, int totalRooms, BigDecimal basePrice) {
         this.id = id;
-        this.hotel = hotel;
+        this.hotelId = hotelId;
         this.name = name;
         this.capacity = capacity;
         this.totalRooms = totalRooms;

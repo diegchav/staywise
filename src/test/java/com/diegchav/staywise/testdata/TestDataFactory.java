@@ -28,12 +28,12 @@ public class TestDataFactory {
     }
 
     public static RoomType createRoomType(
-            Hotel hotel,
-            RoomTypeRepository roomTypeRepository
-    ) {
+            RoomTypeRepository roomTypeRepository,
+            Hotel hotel
+            ) {
         var roomType = new RoomType(
                 UUID.randomUUID(),
-                hotel,
+                hotel.getId(),
                 "Test room type",
                 2,
                 10,
@@ -54,7 +54,6 @@ public class TestDataFactory {
             var date = startDate.plusDays(i);
             var inventoryId = new RoomInventoryId(roomType.getId(), date);
             var roomInventory = new RoomInventory(
-                    roomType,
                     inventoryId,
                     availableRooms
             );

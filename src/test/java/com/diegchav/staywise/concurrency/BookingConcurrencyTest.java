@@ -77,7 +77,7 @@ class BookingConcurrencyTest {
         hotelRepository.deleteAll();
 
         hotel = TestDataFactory.createHotel(hotelRepository);
-        roomType = TestDataFactory.createRoomType(hotel, roomTypeRepository);
+        roomType = TestDataFactory.createRoomType(roomTypeRepository, hotel);
 
         TestDataFactory.createInventory(
                 roomType,

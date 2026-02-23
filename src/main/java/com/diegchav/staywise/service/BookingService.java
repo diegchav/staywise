@@ -56,7 +56,8 @@ public class BookingService {
     }
 
     private Booking persistBooking(CreateBookingRequest request) {
-        var hotel = hotelRepository.findById(request.hotelId()).orElseThrow();
+        // TODO: Add better validation for both room type and hotel.
+        hotelRepository.findById(request.hotelId()).orElseThrow();
         var roomType = roomTypeRepository.findById(request.roomTypeId()).orElseThrow();
 
         var inventoryRows = inventoryRepository.lockInventory(
@@ -79,7 +80,8 @@ public class BookingService {
         var nights = DAYS.between(request.checkIn(), request.checkOut());
         var totalPrice = roomType.getBasePrice().multiply(BigDecimal.valueOf(nights));
 
-        var booking = BookingMapper.toBooking(request, hotel, roomType, totalPrice);
+        var booking = BookingMapper.toBooking(request, totalPrice);
+
         return bookingRepository.save(booking);
     }
 
