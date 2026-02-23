@@ -5,7 +5,7 @@ import com.diegchav.staywise.api.dto.CreateBookingRequest;
 import com.diegchav.staywise.constant.ErrorMessages;
 import com.diegchav.staywise.domain.Booking;
 import com.diegchav.staywise.domain.IdempotencyKey;
-import com.diegchav.staywise.exception.NoInventoryException;
+import com.diegchav.staywise.exception.SoldOutException;
 import com.diegchav.staywise.mapper.BookingMapper;
 import com.diegchav.staywise.repository.*;
 import org.springframework.http.HttpStatus;
@@ -13,25 +13,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
 public class BookingService {
     private final IdempotencyRepository idempotencyRepository;
-    private final HotelRepository hotelRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final RoomInventoryRepository inventoryRepository;
     private final BookingRepository bookingRepository;
 
     public BookingService(
-            IdempotencyRepository idempotencyRepository, HotelRepository hotelRepository,
+            IdempotencyRepository idempotencyRepository,
             RoomTypeRepository roomTypeRepository,
             RoomInventoryRepository inventoryRepository,
             BookingRepository bookingRepository
     ) {
         this.idempotencyRepository = idempotencyRepository;
-        this.hotelRepository = hotelRepository;
         this.roomTypeRepository = roomTypeRepository;
         this.inventoryRepository = inventoryRepository;
         this.bookingRepository = bookingRepository;
@@ -47,6 +46,20 @@ public class BookingService {
             return existing.get().getResponseBody();
         }
 
+        LocalDate date = request.checkIn();
+        while (date.isBefore(request.checkOut())) {
+            var updated = inventoryRepository.tryReserve(
+                    request.roomTypeId(),
+                    date
+            );
+
+            if (updated == 0) {
+                throw new SoldOutException(ErrorMessages.INVENTORY_SOLD_OUT);
+            }
+
+            date = date.plusDays(1);
+        }
+
         var booking = persistBooking(request);
 
         var response = BookingMapper.from(booking, request.hotelId(), request.roomTypeId());
@@ -57,25 +70,8 @@ public class BookingService {
     }
 
     private Booking persistBooking(CreateBookingRequest request) {
-        // TODO: Add better validation for both room type and hotel.
-        hotelRepository.findById(request.hotelId()).orElseThrow();
+        // TODO: Add better validation for room type.
         var roomType = roomTypeRepository.findById(request.roomTypeId()).orElseThrow();
-
-        var inventoryRows = inventoryRepository.lockInventory(
-                request.roomTypeId(), request.checkIn(), request.checkOut()
-        );
-
-        if (inventoryRows.isEmpty()) {
-            throw new NoInventoryException(ErrorMessages.INVENTORY_EMPTY);
-        }
-
-        for (var inventory :  inventoryRows) {
-            if (inventory.getAvailableRooms() <= 0) {
-                throw new NoInventoryException(ErrorMessages.INVENTORY_SOLD_OUT);
-            }
-
-            inventory.incrementReservedRooms();
-        }
 
         // Calculate total price based on base price.
         var nights = DAYS.between(request.checkIn(), request.checkOut());

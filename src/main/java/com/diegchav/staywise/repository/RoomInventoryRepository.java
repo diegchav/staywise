@@ -5,6 +5,7 @@ import com.diegchav.staywise.domain.RoomInventoryId;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
@@ -13,6 +14,21 @@ import java.util.UUID;
 
 public interface RoomInventoryRepository extends JpaRepository<RoomInventory, RoomInventoryId> {
     boolean existsById(RoomInventoryId id);
+
+    @Modifying
+    @Query(value = """
+        UPDATE
+            room_inventory
+        SET
+            reserved_rooms = reserved_rooms + 1
+        WHERE
+            room_type_id = :roomTypeId
+            AND
+            date = :date
+            AND
+            total_rooms - reserved_rooms > 0
+    """, nativeQuery = true)
+    int tryReserve(UUID roomTypeId, LocalDate date);
 
     @Query("""
         SELECT
