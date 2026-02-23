@@ -28,10 +28,19 @@ public class RoomInventory {
             UUID hotelId,
             int totalRooms
     ) {
+        this(id, hotelId, totalRooms, 0);
+    }
+
+    public RoomInventory(
+            RoomInventoryId id,
+            UUID hotelId,
+            int totalRooms,
+            int reservedRooms
+    ) {
         this.id = id;
         this.hotelId = hotelId;
         this.totalRooms = totalRooms;
-        this.reservedRooms = 0;
+        this.reservedRooms = reservedRooms;
     }
 
     public int getAvailableRooms() {

@@ -56,8 +56,8 @@ class BookingConcurrencyTest {
     @Autowired
     BookingRepository bookingRepo;
 
-    Hotel hotel;
-    RoomType roomType;
+    private Hotel hotel;
+    private RoomType roomType;
 
     @BeforeAll
     static void init() {
@@ -80,11 +80,12 @@ class BookingConcurrencyTest {
         roomType = TestDataFactory.createRoomType(roomTypeRepository, hotel);
 
         TestDataFactory.createInventory(
-                roomType,
                 inventoryRepo,
+                roomType,
                 LocalDate.now(),
                 INVENTORY_DAYS,
-                INVENTORY_AVAILABLE_ROOMS
+                INVENTORY_AVAILABLE_ROOMS,
+                0
         );
     }
 

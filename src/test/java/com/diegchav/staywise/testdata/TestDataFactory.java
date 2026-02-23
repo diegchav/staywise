@@ -44,19 +44,20 @@ public class TestDataFactory {
     }
 
     public static void createInventory(
-            RoomType roomType,
             RoomInventoryRepository inventoryRepository,
-            LocalDate startDate,
+            RoomType roomType,
+            LocalDate date,
             int days,
-            int availableRooms
+            int availableRooms,
+            int reservedRooms
     ) {
         for (int i = 0; i < days; i++) {
-            var date = startDate.plusDays(i);
-            var inventoryId = new RoomInventoryId(roomType.getId(), date);
+            var inventoryId = new RoomInventoryId(roomType.getId(), date.plusDays(i));
             var roomInventory = new RoomInventory(
                     inventoryId,
                     roomType.getHotelId(),
-                    availableRooms
+                    availableRooms,
+                    reservedRooms
             );
 
             inventoryRepository.save(roomInventory);
