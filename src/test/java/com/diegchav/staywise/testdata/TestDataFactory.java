@@ -55,6 +55,7 @@ public class TestDataFactory {
             var inventoryId = new RoomInventoryId(roomType.getId(), date);
             var roomInventory = new RoomInventory(
                     inventoryId,
+                    roomType.getHotelId(),
                     availableRooms
             );
 

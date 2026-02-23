@@ -35,6 +35,7 @@ public class InventoryGenerationService {
                 if (!roomInventoryRepository.existsById(id)) {
                     var inventory = new RoomInventory(
                             id,
+                            roomType.getId(),
                             roomType.getTotalRooms()
                     );
 

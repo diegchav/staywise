@@ -46,6 +46,10 @@ public class RoomType {
         return id;
     }
 
+    public UUID getHotelId() {
+        return hotelId;
+    }
+
     public int getTotalRooms() {
         return totalRooms;
     }

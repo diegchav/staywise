@@ -3,11 +3,16 @@ package com.diegchav.staywise.domain;
 import com.diegchav.staywise.constant.ErrorMessages;
 import jakarta.persistence.*;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "room_inventory")
 public class RoomInventory {
     @EmbeddedId
     private RoomInventoryId id;
+
+    @Column(name = "hotel_id", nullable = false)
+    private UUID hotelId;
 
     @Column(name = "total_rooms", nullable = false)
     private int totalRooms;
@@ -19,9 +24,11 @@ public class RoomInventory {
 
     public RoomInventory(
             RoomInventoryId id,
+            UUID hotelId,
             int totalRooms
     ) {
         this.id = id;
+        this.hotelId = hotelId;
         this.totalRooms = totalRooms;
         this.reservedRooms = 0;
     }
