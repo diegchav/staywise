@@ -67,6 +67,14 @@ public class Booking {
         return userId;
     }
 
+    public UUID getRoomTypeId() {
+        return roomTypeId;
+    }
+
+    public UUID getHotelId() {
+        return hotelId;
+    }
+
     public LocalDate getCheckIn() {
         return checkIn;
     }
@@ -85,5 +93,13 @@ public class Booking {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public void cancel() {
+        if (status == BookingStatus.CANCELLED) {
+            return; // idempotent
+        }
+
+        this.status = BookingStatus.CANCELLED;
     }
 }

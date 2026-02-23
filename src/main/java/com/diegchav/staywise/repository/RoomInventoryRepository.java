@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface RoomInventoryRepository extends JpaRepository<RoomInventory, RoomInventoryId> {
@@ -56,6 +57,24 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Ro
             int days
     );
 
+    @Query("""
+        SELECT
+            ri
+        FROM
+            RoomInventory ri
+        WHERE
+            ri.hotelId = :hotelId
+            AND
+            ri.id.roomTypeId = :roomTypeId
+            AND
+            ri.id.date = :date
+    """)
+    Optional<RoomInventory> findInventory(
+            UUID hotelId,
+            UUID roomTypeId,
+            LocalDate date
+    );
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
         SELECT
@@ -70,4 +89,19 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Ro
             ri.id.date < :endDate
     """)
     List<RoomInventory> lockInventory(UUID roomTypeId, LocalDate startDate, LocalDate endDate);
+
+    @Modifying
+    @Query(value = """
+        UPDATE
+            room_inventory
+        SET
+            reserved_rooms = reserved_rooms - 1
+        WHERE
+            room_type_id = :roomTypeId
+            AND
+            date = :date
+            AND
+            reserved_rooms > 0
+    """, nativeQuery = true)
+    int releaseReservation(UUID roomTypeId, LocalDate date);
 }

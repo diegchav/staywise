@@ -43,6 +43,10 @@ public class RoomInventory {
         this.reservedRooms = reservedRooms;
     }
 
+    public int getReservedRooms() {
+        return reservedRooms;
+    }
+
     public int getAvailableRooms() {
         return totalRooms - reservedRooms;
     }

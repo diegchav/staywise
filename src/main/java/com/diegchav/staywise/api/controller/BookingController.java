@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
@@ -23,5 +25,12 @@ public class BookingController {
             @Valid @RequestBody CreateBookingRequest request
     ) {
         return ResponseEntity.ok(bookingService.createBooking(idempotencyKey, request));
+    }
+
+    @PostMapping("/{bookingId}/cancel")
+    public ResponseEntity<Void> cancel(@PathVariable UUID bookingId) {
+        bookingService.cancelBooking(bookingId);
+
+        return ResponseEntity.noContent().build();
     }
 }

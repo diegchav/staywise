@@ -4,7 +4,10 @@ import com.diegchav.staywise.api.dto.BookingResponse;
 import com.diegchav.staywise.api.dto.CreateBookingRequest;
 import com.diegchav.staywise.constant.ErrorMessages;
 import com.diegchav.staywise.domain.Booking;
+import com.diegchav.staywise.domain.BookingStatus;
 import com.diegchav.staywise.domain.IdempotencyKey;
+import com.diegchav.staywise.exception.BookingNotFoundException;
+import com.diegchav.staywise.exception.InventoryReleaseFailedException;
 import com.diegchav.staywise.exception.SoldOutException;
 import com.diegchav.staywise.mapper.BookingMapper;
 import com.diegchav.staywise.repository.*;
@@ -14,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static java.time.temporal.ChronoUnit.DAYS;
 
@@ -90,5 +94,30 @@ public class BookingService {
         );
 
         idempotencyRepository.saveAndFlush(idempotency);
+    }
+
+    @Transactional
+    protected void cancelBooking(UUID bookingId) {
+        var booking = bookingRepository.findById(bookingId).orElseThrow(
+                () -> new BookingNotFoundException(ErrorMessages.BOOKING_NOT_FOUND)
+        );
+
+        // Idempotent behavior
+        if (booking.getStatus() == BookingStatus.CANCELLED) {
+            return;
+        }
+
+        var date = booking.getCheckIn();
+        while (date.isBefore(booking.getCheckOut())) {
+            int updated = inventoryRepository.releaseReservation(booking.getRoomTypeId(), date);
+
+            if (updated == 0) {
+                throw new InventoryReleaseFailedException(ErrorMessages.INVENTORY_RELEASE_FAILED + date);
+            }
+
+            date = date.plusDays(1);
+        }
+
+        booking.cancel();
     }
 }

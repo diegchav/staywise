@@ -5,6 +5,8 @@ import com.diegchav.staywise.api.dto.CreateBookingRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class BookingOrchestratorService {
     private final BookingService bookingService;
@@ -24,5 +26,9 @@ public class BookingOrchestratorService {
         } catch (DataIntegrityViolationException ex) {
             return idempotencyService.fetchStoredResponse(idempotencyKey);
         }
+    }
+
+    public void cancelBooking(UUID bookingId) {
+        bookingService.cancelBooking(bookingId);
     }
 }

@@ -1,9 +1,7 @@
 package com.diegchav.staywise.testdata;
 
-import com.diegchav.staywise.domain.Hotel;
-import com.diegchav.staywise.domain.RoomInventory;
-import com.diegchav.staywise.domain.RoomInventoryId;
-import com.diegchav.staywise.domain.RoomType;
+import com.diegchav.staywise.domain.*;
+import com.diegchav.staywise.repository.BookingRepository;
 import com.diegchav.staywise.repository.HotelRepository;
 import com.diegchav.staywise.repository.RoomInventoryRepository;
 import com.diegchav.staywise.repository.RoomTypeRepository;
@@ -62,5 +60,26 @@ public class TestDataFactory {
 
             inventoryRepository.save(roomInventory);
         }
+    }
+
+    public static Booking createBooking(
+        BookingRepository bookingRepository,
+        UUID userId,
+        UUID hotelId,
+        UUID roomTypeId,
+        LocalDate checkIn,
+        LocalDate checkOut,
+        BigDecimal totalPrice
+    ) {
+        var booking = new Booking(
+                userId,
+                roomTypeId,
+                hotelId,
+                checkIn,
+                checkOut,
+                totalPrice
+        );
+
+        return bookingRepository.save(booking);
     }
 }

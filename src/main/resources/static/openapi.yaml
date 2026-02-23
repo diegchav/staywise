@@ -132,6 +132,43 @@ paths:
         "404":
           description: Booking not found
 
+  /api/bookings/{bookingId}/cancel:
+    post:
+      summary: Cancel a booking
+      description: |
+        Cancels an existing booking and releases reserved inventory.
+        This operation is idempotent — cancelling an already cancelled booking
+        returns success without additional side effects.
+      operationId: cancelBooking
+      tags: [Bookings]
+
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          description: Unique identifier of the booking
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        "204":
+          description: Booking successfully cancelled
+
+        "404":
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "409":
+          description: Booking cannot be cancelled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     AvailableRoomType:
@@ -151,23 +188,18 @@ components:
         - checkIn
         - checkOut
       properties:
-
         userId:
           type: string
           format: uuid
-
         hotelId:
           type: string
           format: uuid
-
         roomTypeId:
           type: string
           format: uuid
-
         checkIn:
           type: string
           format: date
-
         checkOut:
           type: string
           format: date
@@ -175,39 +207,37 @@ components:
     BookingResponse:
       type: object
       properties:
-
         id:
           type: string
           format: uuid
-
         userId:
           type: string
           format: uuid
-
         hotelId:
           type: string
           format: uuid
-
         roomTypeId:
           type: string
           format: uuid
-
         checkIn:
           type: string
           format: date
-
         checkOut:
           type: string
           format: date
-
         status:
           type: string
           example: CONFIRMED
-
         totalPrice:
           type: number
           format: double
-
         createdAt:
           type: string
           format: date-time
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: integer
