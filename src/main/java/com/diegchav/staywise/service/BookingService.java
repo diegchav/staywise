@@ -5,6 +5,7 @@ import com.diegchav.staywise.api.dto.CreateBookingRequest;
 import com.diegchav.staywise.constant.ErrorMessages;
 import com.diegchav.staywise.domain.Booking;
 import com.diegchav.staywise.domain.IdempotencyKey;
+import com.diegchav.staywise.exception.NoInventoryException;
 import com.diegchav.staywise.mapper.BookingMapper;
 import com.diegchav.staywise.repository.*;
 import org.springframework.http.HttpStatus;
@@ -65,12 +66,12 @@ public class BookingService {
         );
 
         if (inventoryRows.isEmpty()) {
-            throw new IllegalStateException(ErrorMessages.INVENTORY_EMPTY);
+            throw new NoInventoryException(ErrorMessages.INVENTORY_EMPTY);
         }
 
         for (var inventory :  inventoryRows) {
             if (inventory.getAvailableRooms() <= 0) {
-                throw new IllegalStateException(ErrorMessages.INVENTORY_SOLD_OUT);
+                throw new NoInventoryException(ErrorMessages.INVENTORY_SOLD_OUT);
             }
 
             inventory.incrementReservedRooms();

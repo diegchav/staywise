@@ -1,6 +1,7 @@
 package com.diegchav.staywise.domain;
 
 import com.diegchav.staywise.constant.ErrorMessages;
+import com.diegchav.staywise.exception.SoldOutException;
 import jakarta.persistence.*;
 
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class RoomInventory {
 
     public void incrementReservedRooms() {
         if (getAvailableRooms() <= 0) {
-            throw new IllegalStateException(ErrorMessages.INVENTORY_EMPTY);
+            throw new SoldOutException(ErrorMessages.INVENTORY_SOLD_OUT);
         }
 
         reservedRooms++;
