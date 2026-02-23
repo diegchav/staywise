@@ -8,6 +8,47 @@ servers:
   - url: http://localhost:8080
 
 paths:
+  /api/availability:
+    get:
+      summary: Search room availability
+      description: Returns available room types for a hotel within a date range.
+      operationId: searchAvailability
+      tags: [Search]
+
+      parameters:
+        - name: hotelId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+
+        - name: checkIn
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+
+        - name: checkOut
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+
+      responses:
+        "200":
+          description: Available room types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AvailableRoomType"
+        "400":
+          description: Invalid date range
+
   /api/bookings:
     post:
       summary: Create a booking
@@ -93,6 +134,14 @@ paths:
 
 components:
   schemas:
+    AvailableRoomType:
+      type: object
+      properties:
+        roomTypeId:
+          type: string
+          format: uuid
+        availableRooms:
+          type: integer
     CreateBookingRequest:
       type: object
       required:
