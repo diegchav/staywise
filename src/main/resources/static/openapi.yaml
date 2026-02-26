@@ -77,10 +77,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookingResponse'
-
         "400":
           description: Invalid request
-
         "409":
           description: No availability
 
@@ -128,7 +126,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BookingResponse'
-
         "404":
           description: Booking not found
 
@@ -169,6 +166,130 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /api/hotels:
+    post:
+      summary: Create a hotel
+      operationId: createHotel
+      tags: [Hotels]
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHotelRequest"
+
+      responses:
+        "201":
+          description: Hotel created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HotelResponse"
+
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: array
+                $ref: "#/components/schemas/ValidationError"
+
+    get:
+      summary: List all hotels
+      operationId: listHotels
+      tags: [Hotels]
+
+      responses:
+        "200":
+          description: List of hotels
+          content:
+            application/json:
+              schema:
+                type: array
+                $ref: "#/components/schemas/HotelResponse"
+
+  /api/hotels/{hotelId}:
+    get:
+      summary: Get hotel by ID
+      operationId: getHotel
+      tags: [Hotels]
+
+      parameters:
+        - name: hotelId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        "200":
+          description: Hotel found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HotelResponse"
+
+        "404":
+          description: Not found
+
+    patch:
+      summary: Partially update a hotel
+      operationId: updateHotel
+      tags: [Hotels]
+
+      parameters:
+        - name: hotelId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateHotelRequest"
+
+      responses:
+        "200":
+          description: Hotel updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HotelResponse"
+
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: array
+                $ref: "#/components/schemas/ValidationError"
+
+        "404":
+          description: Not found
+
+    delete:
+      summary: Delete a hotel
+      operationId: deleteHotel
+      tags: [Hotels]
+
+      parameters:
+        - name: hotelId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+
+      responses:
+        "204":
+          description: Hotel deleted
+
 components:
   schemas:
     AvailableRoomType:
@@ -179,6 +300,7 @@ components:
           format: uuid
         availableRooms:
           type: integer
+
     CreateBookingRequest:
       type: object
       required:
@@ -234,6 +356,59 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    CreateHotelRequest:
+      type: object
+      required:
+        - name
+        - address
+        - city
+        - country
+      properties:
+        name:
+          type: string
+          example: "Hilton Reforma"
+        address:
+          type: string
+          example: "Reforma 101"
+        city:
+          type: string
+          example: "Mexico City"
+        country:
+          type: string
+          example: "Mexico"
+
+    UpdateHotelRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+
+    HotelResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        rating:
+          type: number
+          format: double
+        createdAt:
+          type: string
+          format: date-time
+
     ErrorResponse:
       type: object
       properties:
@@ -241,3 +416,11 @@ components:
           type: string
         code:
           type: integer
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        error:
+          type: string

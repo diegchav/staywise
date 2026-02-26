@@ -15,7 +15,6 @@ public class TestDataFactory {
 
     public static Hotel createHotel(HotelRepository hotelRepository) {
         var hotel = new Hotel(
-                UUID.randomUUID(),
                 "Test hotel",
                 "Test address",
                 "Test city",

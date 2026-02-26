@@ -5,7 +5,10 @@ public class ErrorMessages {
     public static final String AVAILABILITY_INVALID_DATE_RANGE = "Invalid date range";
 
     // Booking.
-    public static final String BOOKING_NOT_FOUND = "Booking not found";
+    public static final String BOOKING_NOT_FOUND = "Booking not found with id: ";
+
+    // Hotels.
+    public static final String HOTEL_NOT_FOUND = "Hotel not found with id: ";
 
     // Idempotency.
     public static final String IDEMPOTENCY_RECORD_NOT_FOUND = "Key exists but record not found";

@@ -66,7 +66,7 @@ public class BookingService {
 
         var booking = persistBooking(request);
 
-        var response = BookingMapper.from(booking, request.hotelId(), request.roomTypeId());
+        var response = BookingMapper.fromEntity(booking, request.hotelId(), request.roomTypeId());
 
         persistIdempotencyKey(idempotencyKey, response);
 
@@ -81,7 +81,7 @@ public class BookingService {
         var nights = DAYS.between(request.checkIn(), request.checkOut());
         var totalPrice = roomType.getBasePrice().multiply(BigDecimal.valueOf(nights));
 
-        var booking = BookingMapper.toBooking(request, totalPrice);
+        var booking = BookingMapper.toEntity(request, totalPrice);
 
         return bookingRepository.save(booking);
     }
@@ -97,9 +97,9 @@ public class BookingService {
     }
 
     @Transactional
-    protected void cancelBooking(UUID bookingId) {
-        var booking = bookingRepository.findById(bookingId).orElseThrow(
-                () -> new BookingNotFoundException(ErrorMessages.BOOKING_NOT_FOUND)
+    protected void cancelBooking(UUID id) {
+        var booking = bookingRepository.findById(id).orElseThrow(
+                () -> new BookingNotFoundException(ErrorMessages.BOOKING_NOT_FOUND + id)
         );
 
         // Idempotent behavior

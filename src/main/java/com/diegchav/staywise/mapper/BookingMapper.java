@@ -10,7 +10,7 @@ import java.util.UUID;
 public class BookingMapper {
     private BookingMapper() {}
 
-    public static BookingResponse from(
+    public static BookingResponse fromEntity(
             Booking booking,
             UUID hotelId,
             UUID roomTypeId
@@ -28,7 +28,7 @@ public class BookingMapper {
         );
     }
 
-    public static Booking toBooking(
+    public static Booking toEntity(
             CreateBookingRequest request,
             BigDecimal totalPrice
     ) {
