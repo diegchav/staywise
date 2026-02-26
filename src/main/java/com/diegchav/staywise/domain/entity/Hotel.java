@@ -1,4 +1,4 @@
-package com.diegchav.staywise.domain;
+package com.diegchav.staywise.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

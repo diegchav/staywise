@@ -1,7 +1,7 @@
 package com.diegchav.staywise.repository;
 
-import com.diegchav.staywise.domain.RoomInventory;
-import com.diegchav.staywise.domain.RoomInventoryId;
+import com.diegchav.staywise.domain.entity.RoomInventory;
+import com.diegchav.staywise.domain.entity.RoomInventoryId;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;

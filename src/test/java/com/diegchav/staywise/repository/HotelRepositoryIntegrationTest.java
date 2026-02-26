@@ -1,6 +1,6 @@
 package com.diegchav.staywise.repository;
 
-import com.diegchav.staywise.domain.Hotel;
+import com.diegchav.staywise.domain.entity.Hotel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

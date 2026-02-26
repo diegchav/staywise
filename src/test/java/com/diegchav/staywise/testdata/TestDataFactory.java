@@ -1,6 +1,6 @@
 package com.diegchav.staywise.testdata;
 
-import com.diegchav.staywise.domain.*;
+import com.diegchav.staywise.domain.entity.*;
 import com.diegchav.staywise.repository.BookingRepository;
 import com.diegchav.staywise.repository.HotelRepository;
 import com.diegchav.staywise.repository.RoomInventoryRepository;

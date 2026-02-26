@@ -1,4 +1,4 @@
-package com.diegchav.staywise.domain;
+package com.diegchav.staywise.domain.entity;
 
 public enum BookingStatus {
     PENDING,

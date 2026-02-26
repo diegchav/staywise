@@ -2,7 +2,7 @@ package com.diegchav.staywise.mapper;
 
 import com.diegchav.staywise.api.dto.BookingResponse;
 import com.diegchav.staywise.api.dto.CreateBookingRequest;
-import com.diegchav.staywise.domain.Booking;
+import com.diegchav.staywise.domain.entity.Booking;
 
 import java.math.BigDecimal;
 import java.util.UUID;

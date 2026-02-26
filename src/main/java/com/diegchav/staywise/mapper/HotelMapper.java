@@ -2,7 +2,7 @@ package com.diegchav.staywise.mapper;
 
 import com.diegchav.staywise.api.dto.CreateHotelRequest;
 import com.diegchav.staywise.api.dto.HotelResponse;
-import com.diegchav.staywise.domain.Hotel;
+import com.diegchav.staywise.domain.entity.Hotel;
 
 import java.math.BigDecimal;
 

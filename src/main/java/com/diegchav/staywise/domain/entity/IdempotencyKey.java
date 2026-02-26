@@ -1,4 +1,4 @@
-package com.diegchav.staywise.domain;
+package com.diegchav.staywise.domain.entity;
 
 import com.diegchav.staywise.api.dto.BookingResponse;
 import jakarta.persistence.*;

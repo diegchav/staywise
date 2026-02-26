@@ -2,7 +2,7 @@ package com.diegchav.staywise.service;
 
 import com.diegchav.staywise.api.dto.CreateHotelRequest;
 import com.diegchav.staywise.api.dto.UpdateHotelRequest;
-import com.diegchav.staywise.domain.Hotel;
+import com.diegchav.staywise.domain.entity.Hotel;
 import com.diegchav.staywise.exception.HotelNotFoundException;
 import com.diegchav.staywise.exception.HotelUpdateException;
 import com.diegchav.staywise.repository.HotelRepository;

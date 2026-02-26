@@ -1,4 +1,4 @@
-package com.diegchav.staywise.domain;
+package com.diegchav.staywise.domain.entity;
 
 import com.diegchav.staywise.constant.ErrorMessages;
 import com.diegchav.staywise.exception.SoldOutException;

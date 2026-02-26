@@ -1,7 +1,7 @@
 package com.diegchav.staywise.integration.availability;
 
-import com.diegchav.staywise.domain.Hotel;
-import com.diegchav.staywise.domain.RoomType;
+import com.diegchav.staywise.domain.entity.Hotel;
+import com.diegchav.staywise.domain.entity.RoomType;
 import com.diegchav.staywise.repository.HotelRepository;
 import com.diegchav.staywise.repository.RoomInventoryRepository;
 import com.diegchav.staywise.repository.RoomTypeRepository;

@@ -1,8 +1,8 @@
 package com.diegchav.staywise.integration.concurrency;
 
 import com.diegchav.staywise.api.dto.CreateBookingRequest;
-import com.diegchav.staywise.domain.Hotel;
-import com.diegchav.staywise.domain.RoomType;
+import com.diegchav.staywise.domain.entity.Hotel;
+import com.diegchav.staywise.domain.entity.RoomType;
 import com.diegchav.staywise.repository.BookingRepository;
 import com.diegchav.staywise.repository.HotelRepository;
 import com.diegchav.staywise.repository.RoomInventoryRepository;

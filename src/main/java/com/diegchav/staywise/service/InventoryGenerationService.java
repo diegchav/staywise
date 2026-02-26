@@ -1,7 +1,7 @@
 package com.diegchav.staywise.service;
 
-import com.diegchav.staywise.domain.RoomInventory;
-import com.diegchav.staywise.domain.RoomInventoryId;
+import com.diegchav.staywise.domain.entity.RoomInventory;
+import com.diegchav.staywise.domain.entity.RoomInventoryId;
 import com.diegchav.staywise.repository.RoomInventoryRepository;
 import com.diegchav.staywise.repository.RoomTypeRepository;
 import org.springframework.stereotype.Service;

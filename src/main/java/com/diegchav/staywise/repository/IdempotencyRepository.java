@@ -1,6 +1,6 @@
 package com.diegchav.staywise.repository;
 
-import com.diegchav.staywise.domain.IdempotencyKey;
+import com.diegchav.staywise.domain.entity.IdempotencyKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
