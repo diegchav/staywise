@@ -27,6 +27,7 @@ public class Hotel {
     @Column(nullable = false)
     private String country;
 
+    @Column(precision = 10, scale = 2)
     private BigDecimal rating;
 
     @Column(name = "created_at", nullable = false, updatable = false)
