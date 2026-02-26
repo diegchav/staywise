@@ -1,4 +1,4 @@
-package com.diegchav.staywise.concurrency;
+package com.diegchav.staywise.integration.concurrency;
 
 import com.diegchav.staywise.api.dto.CreateBookingRequest;
 import com.diegchav.staywise.domain.Hotel;
@@ -9,15 +9,15 @@ import com.diegchav.staywise.repository.RoomInventoryRepository;
 import com.diegchav.staywise.repository.RoomTypeRepository;
 import com.diegchav.staywise.service.BookingOrchestratorService;
 import com.diegchav.staywise.testdata.TestDataFactory;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -28,18 +28,16 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-class BookingConcurrencyTest {
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18");
-
+@Testcontainers
+class BookingConcurrencyIntegrationTest {
     private static final int INVENTORY_DAYS = 1;
     private static final int INVENTORY_AVAILABLE_ROOMS = 5;
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
+                    .withDatabaseName("staywise");
 
     @Autowired
     BookingOrchestratorService bookingService;
@@ -58,16 +56,6 @@ class BookingConcurrencyTest {
 
     private Hotel hotel;
     private RoomType roomType;
-
-    @BeforeAll
-    static void init() {
-        postgres.start();
-    }
-
-    @AfterAll
-    static void done() {
-        postgres.stop();
-    }
 
     @BeforeEach
     void setupInventory() {

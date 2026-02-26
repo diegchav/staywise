@@ -1,4 +1,4 @@
-package com.diegchav.staywise.cancellation;
+package com.diegchav.staywise.integration.cancellation;
 
 import com.diegchav.staywise.domain.Booking;
 import com.diegchav.staywise.domain.BookingStatus;
@@ -13,9 +13,11 @@ import com.diegchav.staywise.testdata.TestDataFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -25,17 +27,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-public class BookingCancellationTest {
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18");
-
+@Testcontainers
+public class BookingCancellationIntegrationTest {
     private static final int BOOKED_DAYS = 3;
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
+                    .withDatabaseName("staywise");
 
     @Autowired
     HotelRepository hotelRepository;
@@ -53,16 +53,6 @@ public class BookingCancellationTest {
     BookingOrchestratorService bookingService;
 
     private Booking booking;
-
-    @BeforeAll
-    static void init() {
-        postgres.start();
-    }
-
-    @AfterAll
-    static void done() {
-        postgres.stop();
-    }
 
     @BeforeEach
     void setup() {

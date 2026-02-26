@@ -1,4 +1,4 @@
-package com.diegchav.staywise.availability;
+package com.diegchav.staywise.integration.availability;
 
 import com.diegchav.staywise.domain.Hotel;
 import com.diegchav.staywise.domain.RoomType;
@@ -10,10 +10,12 @@ import com.diegchav.staywise.testdata.TestDataFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDate;
 
@@ -21,17 +23,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-public class AvailabilityIntegrationTest {
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18");
-
+@Testcontainers
+public class AvailabilityIntegrationIntegrationTest {
     private static final int SEARCH_FOR_DAYS = 3;
 
-    @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgres::getJdbcUrl);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
-    }
+    @Container
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
+                    .withDatabaseName("staywise");
 
     @Autowired
     HotelRepository hotelRepository;
@@ -47,16 +47,6 @@ public class AvailabilityIntegrationTest {
 
     private Hotel hotel;
     private RoomType roomType;
-
-    @BeforeAll
-    static void init() {
-        postgres.start();
-    }
-
-    @AfterAll
-    static void done() {
-        postgres.stop();
-    }
 
     @BeforeEach
     void setup() {
