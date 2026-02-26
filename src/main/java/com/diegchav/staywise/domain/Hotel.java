@@ -19,6 +19,9 @@ public class Hotel {
     private String name;
 
     @Column(nullable = false)
+    private String address;
+
+    @Column(nullable = false)
     private String city;
 
     @Column(nullable = false)
@@ -31,9 +34,17 @@ public class Hotel {
 
     protected Hotel() {}
 
-    public Hotel(UUID id, String name, String city, String country, BigDecimal rating) {
+    public Hotel(
+            UUID id,
+            String name,
+            String address,
+            String city,
+            String country,
+            BigDecimal rating
+    ) {
         this.id = id;
         this.name = name;
+        this.address = address;
         this.city = city;
         this.country = country;
         this.rating = rating;

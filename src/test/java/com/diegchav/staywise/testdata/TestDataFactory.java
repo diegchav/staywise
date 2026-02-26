@@ -17,6 +17,7 @@ public class TestDataFactory {
         var hotel = new Hotel(
                 UUID.randomUUID(),
                 "Test hotel",
+                "Test address",
                 "Test city",
                 "Test country",
                 BigDecimal.valueOf(2.5)
