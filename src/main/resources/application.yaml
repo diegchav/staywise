@@ -1,6 +1,21 @@
+app:
+  hotels:
+    events:
+      topic: hotel.events
+
 spring:
   application:
     name: staywise
+
+  cloud:
+    stream:
+      bindings:
+        produceHotelEvents-out-0:
+          destination: ${app.hotels.events.topic}
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092
 
   datasource:
     url: jdbc:postgresql://localhost:5432/staywise

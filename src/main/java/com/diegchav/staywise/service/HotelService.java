@@ -8,6 +8,7 @@ import com.diegchav.staywise.constant.ErrorMessages;
 import com.diegchav.staywise.exception.HotelNotFoundException;
 import com.diegchav.staywise.exception.HotelUpdateException;
 import com.diegchav.staywise.mapper.HotelMapper;
+import com.diegchav.staywise.producer.HotelEventProducer;
 import com.diegchav.staywise.repository.HotelRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,9 +21,11 @@ import java.util.UUID;
 @Service
 public class HotelService {
     private final HotelRepository repository;
+    private final HotelEventProducer producer;
 
-    public HotelService(HotelRepository repository) {
+    public HotelService(HotelRepository repository, HotelEventProducer producer) {
         this.repository = repository;
+        this.producer = producer;
     }
 
     public List<HotelResponse> getAll() {
@@ -39,9 +42,12 @@ public class HotelService {
         return HotelMapper.fromEntity(found);
     }
 
+    @Transactional
     public HotelResponse create(CreateHotelRequest request) {
         var toSave = HotelMapper.toEntity(request, BigDecimal.valueOf(5.0));
         var saved = repository.save(toSave);
+
+        producer.produceHotelEvents(HotelMapper.toEvent(saved));
 
         return HotelMapper.fromEntity(saved);
     }

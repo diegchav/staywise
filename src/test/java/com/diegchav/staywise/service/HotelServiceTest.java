@@ -3,8 +3,10 @@ package com.diegchav.staywise.service;
 import com.diegchav.staywise.api.dto.CreateHotelRequest;
 import com.diegchav.staywise.api.dto.UpdateHotelRequest;
 import com.diegchav.staywise.domain.entity.Hotel;
+import com.diegchav.staywise.domain.event.HotelCreatedEvent;
 import com.diegchav.staywise.exception.HotelNotFoundException;
 import com.diegchav.staywise.exception.HotelUpdateException;
+import com.diegchav.staywise.producer.HotelEventProducer;
 import com.diegchav.staywise.repository.HotelRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +29,9 @@ class HotelServiceTest {
     @Mock
     private HotelRepository hotelRepository;
 
+    @Mock
+    private HotelEventProducer hotelProducer;
+
     @InjectMocks
     private HotelService hotelService;
 
@@ -46,6 +51,7 @@ class HotelServiceTest {
     @Test
     void shouldCreateHotel() {
         when(hotelRepository.save(any(Hotel.class))).thenReturn(hotel);
+        doNothing().when(hotelProducer).produceHotelEvents(any(HotelCreatedEvent.class));
 
         var request = new CreateHotelRequest(
                 "Test Name",
