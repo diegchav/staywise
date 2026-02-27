@@ -5,8 +5,6 @@ import com.diegchav.staywise.api.dto.HotelResponse;
 import com.diegchav.staywise.api.dto.UpdateHotelRequest;
 import com.diegchav.staywise.repository.HotelRepository;
 import com.diegchav.staywise.testdata.TestDataFactory;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 import java.util.UUID;
@@ -26,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
+@Testcontainers
 @AutoConfigureMockMvc
 public class HotelIntegrationIntegrationTest {
     @Container
@@ -40,16 +40,13 @@ public class HotelIntegrationIntegrationTest {
     @Autowired
     private HotelRepository hotelRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
     @AfterEach
     void teardown() {
         hotelRepository.deleteAll();
     }
 
     @Test
-    void shouldCreateHotel() throws JsonProcessingException {
+    void shouldCreateHotel() {
         var createRequest = new CreateHotelRequest(
                 "Test hotel",
                 "Test address",
@@ -59,7 +56,7 @@ public class HotelIntegrationIntegrationTest {
 
         client.post()
                 .uri("/api/hotels")
-                .bodyValue(objectMapper.writeValueAsString(createRequest))
+                .bodyValue(createRequest)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
                 .exchange()
                 .expectStatus().isCreated()
@@ -77,7 +74,7 @@ public class HotelIntegrationIntegrationTest {
     }
 
     @Test
-    void shouldFailToCreateWithInvalidHotelName() throws JsonProcessingException {
+    void shouldFailToCreateWithInvalidHotelName() {
         var createRequest = new CreateHotelRequest(
                 "",
                 "Test address",
@@ -87,7 +84,7 @@ public class HotelIntegrationIntegrationTest {
 
         client.post()
                 .uri("/api/hotels")
-                .bodyValue(objectMapper.writeValueAsString(createRequest))
+                .bodyValue(createRequest)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
                 .exchange()
                 .expectStatus().isBadRequest();
@@ -155,7 +152,7 @@ public class HotelIntegrationIntegrationTest {
     }
 
     @Test
-    void shouldUpdateHotel() throws JsonProcessingException {
+    void shouldUpdateHotel() {
         var hotel = TestDataFactory.createHotel(hotelRepository);
 
         var updateRequest = new UpdateHotelRequest(
@@ -167,7 +164,7 @@ public class HotelIntegrationIntegrationTest {
 
         client.patch()
                 .uri("/api/hotels/{id}", hotel.getId())
-                .bodyValue(objectMapper.writeValueAsString(updateRequest))
+                .bodyValue(updateRequest)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
                 .exchange()
                 .expectStatus().isOk()
@@ -185,7 +182,7 @@ public class HotelIntegrationIntegrationTest {
     }
 
     @Test
-    void shouldPartiallyUpdateHotel() throws JsonProcessingException {
+    void shouldPartiallyUpdateHotel() {
         var hotel = TestDataFactory.createHotel(hotelRepository);
 
         var updateRequest = new UpdateHotelRequest(
@@ -197,7 +194,7 @@ public class HotelIntegrationIntegrationTest {
 
         client.patch()
                 .uri("/api/hotels/{id}", hotel.getId())
-                .bodyValue(objectMapper.writeValueAsString(updateRequest))
+                .bodyValue(updateRequest)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
                 .exchange()
                 .expectStatus().isOk()
@@ -215,7 +212,7 @@ public class HotelIntegrationIntegrationTest {
     }
 
     @Test
-    void shouldFailUpdateIfEmptyValues() throws JsonProcessingException {
+    void shouldFailUpdateIfEmptyValues() {
         var hotel = TestDataFactory.createHotel(hotelRepository);
 
         var updateRequest = new UpdateHotelRequest(
@@ -227,14 +224,14 @@ public class HotelIntegrationIntegrationTest {
 
         client.patch()
                 .uri("/api/hotels/{id}", hotel.getId())
-                .bodyValue(objectMapper.writeValueAsString(updateRequest))
+                .bodyValue(updateRequest)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
                 .exchange()
                 .expectStatus().isBadRequest();
     }
 
     @Test
-    void shouldFailUpdateIfNotFound() throws JsonProcessingException {
+    void shouldFailUpdateIfNotFound() {
         var hotelId = UUID.randomUUID();
 
         var updateRequest = new UpdateHotelRequest(
@@ -246,7 +243,7 @@ public class HotelIntegrationIntegrationTest {
 
         client.patch()
                 .uri("/api/hotels/{id}", hotelId)
-                .bodyValue(objectMapper.writeValueAsString(updateRequest))
+                .bodyValue(updateRequest)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON.toString())
                 .exchange()
                 .expectStatus().isNotFound();
