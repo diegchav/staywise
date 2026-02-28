@@ -8,10 +8,16 @@ spring:
     name: staywise
 
   cloud:
+    function:
+      definition: consumeHotelEvents
     stream:
       bindings:
+        consumeHotelEvents-in-0:
+          destination: hotel.events
+          group: hotel-service
+          content-type: application/json
         produceHotelEvents-out-0:
-          destination: ${app.hotels.events.topic}
+          destination: hotel.events
           content-type: application/json
       kafka:
         binder:
@@ -21,6 +27,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/staywise
     username: postgres
     password: postgres
+
+  elasticsearch:
+    uris: http://localhost:9200
 
   jpa:
     hibernate:

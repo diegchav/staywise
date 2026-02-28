@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
@@ -38,6 +39,13 @@ public class HotelIntegrationIntegrationTest {
     @Container
     @ServiceConnection
     static KafkaContainer kafka = new  KafkaContainer(DockerImageName.parse("apache/kafka:3.9.2"));
+
+    @Container
+    @ServiceConnection
+    static ElasticsearchContainer elasticsearch =
+            new ElasticsearchContainer(DockerImageName.parse("elasticsearch:8.19.12"))
+                    .withEnv("discovery.type", "single-node")
+                    .withEnv("xpack.security.enabled", "false");
 
     @Autowired
     private WebTestClient client;

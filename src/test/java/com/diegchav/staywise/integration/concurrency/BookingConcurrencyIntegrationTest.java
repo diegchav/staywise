@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDate;
@@ -38,6 +40,17 @@ class BookingConcurrencyIntegrationTest {
     static PostgreSQLContainer<?> postgres =
             new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
                     .withDatabaseName("staywise");
+
+    @Container
+    @ServiceConnection
+    static KafkaContainer kafka = new  KafkaContainer(DockerImageName.parse("apache/kafka:3.9.2"));
+
+    @Container
+    @ServiceConnection
+    static ElasticsearchContainer elasticsearch =
+            new ElasticsearchContainer(DockerImageName.parse("elasticsearch:8.19.12"))
+                    .withEnv("discovery.type", "single-node")
+                    .withEnv("xpack.security.enabled", "false");
 
     @Autowired
     BookingOrchestratorService bookingService;
