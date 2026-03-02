@@ -290,6 +290,79 @@ paths:
         "204":
           description: Hotel deleted
 
+  /api/search:
+    get:
+      summary: Search hotels
+      operationId: search
+      tags: [Search]
+
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Full-text search on hotel name
+
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by exact city
+
+        - name: country
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by exact country
+
+        - name: minRating
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+          description: Minimum rating (inclusive
+
+        - name: maxRating
+          in: query
+          required: false
+          schema:
+            type: number
+            format: double
+          description: Maximum rating (inclusive)
+
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Sort field and direction (e.g, rating,desc)
+
+      responses:
+        "200":
+          description: Paged hotel search result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+
 components:
   schemas:
     AvailableRoomType:
@@ -408,6 +481,21 @@ components:
         createdAt:
           type: string
           format: date-time
+
+    SearchResponse:
+      type: object
+      properties:
+        hotelId:
+          type: string
+        name:
+          type: string
+        city:
+          type: string
+        country:
+          type: string
+        rating:
+          type: number
+          format: double
 
     ErrorResponse:
       type: object

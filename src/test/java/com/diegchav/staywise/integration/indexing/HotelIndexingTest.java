@@ -1,7 +1,7 @@
 package com.diegchav.staywise.integration.indexing;
 
 import com.diegchav.staywise.api.dto.CreateHotelRequest;
-import com.diegchav.staywise.repository.search.HotelSearchRepository;
+import com.diegchav.staywise.repository.SearchRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -46,7 +46,7 @@ public class HotelIndexingTest {
     private WebTestClient webClient;
 
     @Autowired
-    private HotelSearchRepository hotelSearchRepository;
+    private SearchRepository searchRepository;
 
     @Test
     void shouldConsumeEventAndIndexDocument() {
@@ -70,7 +70,7 @@ public class HotelIndexingTest {
                 .atMost(Duration.ofSeconds(10))
                 .untilAsserted(() -> {
                     var docs = StreamSupport
-                            .stream(hotelSearchRepository.findAll().spliterator(), false)
+                            .stream(searchRepository.findAll().spliterator(), false)
                             .toList();
 
                     assertEquals(1, docs.size());

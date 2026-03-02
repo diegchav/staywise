@@ -1,9 +1,7 @@
 package com.diegchav.staywise.domain.document;
 
 import jakarta.persistence.Id;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.time.Instant;
 
@@ -12,7 +10,12 @@ public class HotelDocument {
     @Id
     private String id;
 
-    @Field(type = FieldType.Text)
+    @MultiField(
+            mainField = @Field(type = FieldType.Text),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String name;
 
     @Field(type = FieldType.Keyword)
