@@ -75,7 +75,7 @@ public class SearchIntegrationTest {
     }
 
     @Test
-    void shouldSearchByCityAndCountryAndRating() {
+    void shouldSearchByCityAndCountry() {
         createHotel("Hotel 1", "CDMX", "Mexico");
         createHotel("Hotel 2", "New York", "USA");
         createHotel("Hotel 3", "Madrid", "Spain");

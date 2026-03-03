@@ -1,6 +1,6 @@
 package com.diegchav.staywise.service;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import com.diegchav.staywise.api.dto.SearchResponse;
 import com.diegchav.staywise.domain.document.HotelDocument;
 import com.diegchav.staywise.mapper.SearchMapper;
@@ -10,6 +10,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Map;
 
 @Service
@@ -34,10 +35,10 @@ public class SearchService {
     ) {
         Pageable adaptedPageable = adaptSort(pageable);
 
-        var bool = getBoolBuilder(q, city, country, minRating, maxRating);
+        var baseQuery = getQuery(q, city, country, minRating, maxRating);
 
         var query = NativeQuery.builder()
-                .withQuery(bool.build()._toQuery())
+                .withQuery(baseQuery)
                 .withPageable(adaptedPageable)
                 .build();
 
@@ -73,7 +74,7 @@ public class SearchService {
         );
     }
 
-    private static BoolQuery.Builder getBoolBuilder(
+    private static Query getQuery(
             String q,
             String city,
             String country,
@@ -119,6 +120,36 @@ public class SearchService {
             })));
         }
 
-        return bool;
+        Query finalQuery;
+
+        if (q != null && !q.isBlank()) {
+            finalQuery = Query.of(qb -> qb.functionScore(fsb -> fsb
+                    .query(inner -> inner.bool(bool.build()))
+                    .functions(
+                            Arrays.asList(
+                                    FunctionScore.of(fs -> fs
+                                            .weight(2.0)
+                                            .filter(f -> f.term(t -> t
+                                                    .field("name.keyword")
+                                                    .value(q)
+                                            ))
+                                    ),
+                                    FunctionScore.of(fs -> fs
+                                            .fieldValueFactor(fvf -> fvf
+                                                    .field("rating")
+                                                    .factor(1.5)
+                                                    .modifier(FieldValueFactorModifier.Sqrt)
+                                            )
+                                    )
+                            )
+                    )
+                    .scoreMode(FunctionScoreMode.Sum)
+                    .boostMode(FunctionBoostMode.Multiply)
+            ));
+        } else {
+            finalQuery = Query.of(qb -> qb.bool(bool.build()));
+        }
+
+        return finalQuery;
     }
 }
