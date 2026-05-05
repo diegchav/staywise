@@ -1,7 +1,7 @@
 -- Idempotency keys
 
 CREATE TABLE IF NOT EXISTS idempotency_keys (
-    id                  UUID DEFAULT uuidv7() PRIMARY KEY,
+    id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     idempotency_key     VARCHAR(255) NOT NULL,
     response_body       JSONB,
     status_code         INT,
