@@ -46,7 +46,7 @@ public class TestDataFactory {
             RoomType roomType,
             LocalDate date,
             int days,
-            int availableRooms,
+            int totalRooms,
             int reservedRooms
     ) {
         for (int i = 0; i < days; i++) {
@@ -54,7 +54,7 @@ public class TestDataFactory {
             var roomInventory = new RoomInventory(
                     inventoryId,
                     roomType.getHotelId(),
-                    availableRooms,
+                    totalRooms,
                     reservedRooms
             );
 

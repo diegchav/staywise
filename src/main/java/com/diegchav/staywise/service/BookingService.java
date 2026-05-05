@@ -41,7 +41,7 @@ public class BookingService {
     }
 
     @Transactional
-    protected BookingResponse createBooking(
+    public BookingResponse createBooking(
             String idempotencyKey,
             CreateBookingRequest request
     ) {
@@ -97,7 +97,7 @@ public class BookingService {
     }
 
     @Transactional
-    protected void cancelBooking(UUID id) {
+    public void cancelBooking(UUID id) {
         var booking = bookingRepository.findById(id).orElseThrow(
                 () -> new BookingNotFoundException(ErrorMessages.BOOKING_NOT_FOUND + id)
         );
@@ -106,6 +106,8 @@ public class BookingService {
         if (booking.getStatus() == BookingStatus.CANCELLED) {
             return;
         }
+
+        booking.cancel();
 
         var date = booking.getCheckIn();
         while (date.isBefore(booking.getCheckOut())) {
@@ -117,7 +119,5 @@ public class BookingService {
 
             date = date.plusDays(1);
         }
-
-        booking.cancel();
     }
 }

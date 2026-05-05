@@ -5,7 +5,7 @@ import org.springframework.data.elasticsearch.annotations.*;
 
 import java.time.Instant;
 
-@Document(indexName = "hotels")
+@Document(indexName = "#{@esConfig.getIndexName()}")
 public class HotelDocument {
     @Id
     private String id;

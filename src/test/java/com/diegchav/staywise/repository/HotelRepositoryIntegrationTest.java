@@ -1,5 +1,6 @@
 package com.diegchav.staywise.repository;
 
+import com.diegchav.staywise.constant.DockerImages;
 import com.diegchav.staywise.domain.entity.Hotel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class HotelRepositoryIntegrationTest {
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
+            new PostgreSQLContainer<>(DockerImageName.parse(DockerImages.POSTGRES))
                     .withDatabaseName("staywise");
 
     @Autowired

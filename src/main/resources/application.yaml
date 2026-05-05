@@ -2,6 +2,9 @@ app:
   hotels:
     events:
       topic: hotel.events
+      group: hotel-service
+    search:
+      index: hotels
 
 spring:
   application:
@@ -13,11 +16,11 @@ spring:
     stream:
       bindings:
         consumeHotelEvents-in-0:
-          destination: hotel.events
-          group: hotel-service
+          destination: ${app.hotels.events.topic}
+          group: ${app.hotels.events.group}
           content-type: application/json
         produceHotelEvents-out-0:
-          destination: hotel.events
+          destination: ${app.hotels.events.topic}
           content-type: application/json
       kafka:
         binder:

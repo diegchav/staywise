@@ -1,5 +1,6 @@
 package com.diegchav.staywise.integration.availability;
 
+import com.diegchav.staywise.constant.DockerImages;
 import com.diegchav.staywise.domain.entity.Hotel;
 import com.diegchav.staywise.domain.entity.RoomType;
 import com.diegchav.staywise.repository.HotelRepository;
@@ -9,14 +10,13 @@ import com.diegchav.staywise.service.AvailabilityService;
 import com.diegchav.staywise.testdata.TestDataFactory;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDate;
@@ -24,7 +24,8 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest
+@DataJpaTest
+@Import(AvailabilityService.class)
 @Testcontainers
 public class AvailabilityIntegrationIntegrationTest {
     private static final int SEARCH_FOR_DAYS = 3;
@@ -32,19 +33,8 @@ public class AvailabilityIntegrationIntegrationTest {
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
+            new PostgreSQLContainer<>(DockerImageName.parse(DockerImages.POSTGRES))
                     .withDatabaseName("staywise");
-
-    @Container
-    @ServiceConnection
-    static KafkaContainer kafka = new  KafkaContainer(DockerImageName.parse("apache/kafka:3.9.2"));
-
-    @Container
-    @ServiceConnection
-    static ElasticsearchContainer elasticsearch =
-            new ElasticsearchContainer(DockerImageName.parse("elasticsearch:8.19.12"))
-                    .withEnv("discovery.type", "single-node")
-                    .withEnv("xpack.security.enabled", "false");
 
     @Autowired
     HotelRepository hotelRepository;
@@ -65,13 +55,6 @@ public class AvailabilityIntegrationIntegrationTest {
     void setup() {
         hotel = TestDataFactory.createHotel(hotelRepository);
         roomType = TestDataFactory.createRoomType(roomTypeRepository, hotel);
-    }
-
-    @AfterEach
-    void teardown() {
-        roomInventoryRepository.deleteAll();
-        roomTypeRepository.deleteAll();
-        hotelRepository.deleteAll();
     }
 
     @Test

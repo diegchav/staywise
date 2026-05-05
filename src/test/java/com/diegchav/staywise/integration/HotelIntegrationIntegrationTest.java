@@ -3,23 +3,25 @@ package com.diegchav.staywise.integration;
 import com.diegchav.staywise.api.dto.CreateHotelRequest;
 import com.diegchav.staywise.api.dto.HotelResponse;
 import com.diegchav.staywise.api.dto.UpdateHotelRequest;
+import com.diegchav.staywise.domain.document.HotelDocument;
+import com.diegchav.staywise.integration.config.TestContainersConfig;
 import com.diegchav.staywise.repository.HotelRepository;
 import com.diegchav.staywise.testdata.TestDataFactory;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.util.UUID;
 
@@ -27,31 +29,39 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
-@Testcontainers
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @AutoConfigureMockMvc
+@Import(TestContainersConfig.class)
 public class HotelIntegrationIntegrationTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
-                    .withDatabaseName("staywise");
+    private static final String TEST_INDEX = "hotels-test-" + UUID.randomUUID();
+    private static final String TEST_GROUP = "test-group-" + UUID.randomUUID();
 
-    @Container
-    @ServiceConnection
-    static KafkaContainer kafka = new  KafkaContainer(DockerImageName.parse("apache/kafka:3.9.2"));
+    @Autowired
+    private ElasticsearchOperations operations;
 
-    @Container
-    @ServiceConnection
-    static ElasticsearchContainer elasticsearch =
-            new ElasticsearchContainer(DockerImageName.parse("elasticsearch:8.19.12"))
-                    .withEnv("discovery.type", "single-node")
-                    .withEnv("xpack.security.enabled", "false");
+    @Autowired
+    private HotelRepository hotelRepository;
 
     @Autowired
     private WebTestClient client;
 
-    @Autowired
-    private HotelRepository hotelRepository;
+    @DynamicPropertySource
+    static void dynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("app.hotels.search.index", () -> TEST_INDEX);
+        registry.add("app.hotels.events.group", () -> TEST_GROUP);
+    }
+
+    @BeforeEach
+    void setup() {
+        IndexOperations indexOps = operations.indexOps(HotelDocument.class);
+
+        if (indexOps.exists()) {
+            indexOps.delete();
+        }
+
+        indexOps.create();
+        indexOps.putMapping();
+    }
 
     @AfterEach
     void teardown() {

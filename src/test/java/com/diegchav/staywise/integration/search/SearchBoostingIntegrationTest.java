@@ -1,50 +1,45 @@
 package com.diegchav.staywise.integration.search;
 
+import com.diegchav.staywise.config.ElasticsearchConfig;
+import com.diegchav.staywise.constant.DockerImages;
 import com.diegchav.staywise.domain.document.HotelDocument;
 import com.diegchav.staywise.service.SearchService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.data.elasticsearch.DataElasticsearchTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+@DataElasticsearchTest
+@Import({
+        ElasticsearchConfig.class,
+        SearchService.class
+})
 @Testcontainers
 public class SearchBoostingIntegrationTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
-            .withDatabaseName("staywise");
-
-    @Container
-    @ServiceConnection
-    static KafkaContainer kafka =
-            new KafkaContainer(DockerImageName.parse("apache/kafka:3.9.2"));
-
-    @Container
-    @ServiceConnection
-    static ElasticsearchContainer elasticsearch =
-            new ElasticsearchContainer(DockerImageName.parse("elasticsearch:8.19.12"))
-                    .withEnv("discovery.type", "single-node")
-                    .withEnv("xpack.security.enabled", "false");
+    @Autowired
+    private SearchService searchService;
 
     @Autowired
     private ElasticsearchOperations operations;
 
-    @Autowired
-    private SearchService searchService;
+    @Container
+    @ServiceConnection
+    static final ElasticsearchContainer elasticsearch =
+            new ElasticsearchContainer(DockerImageName.parse(DockerImages.ELASTICSEARCH))
+                    .withEnv("discovery.type", "single-node")
+                    .withEnv("xpack.security.enabled", "false");
 
     @Test
     void shouldBoostExactMatchOnName() {

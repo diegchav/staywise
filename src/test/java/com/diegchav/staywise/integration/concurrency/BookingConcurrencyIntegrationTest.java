@@ -1,6 +1,7 @@
 package com.diegchav.staywise.integration.concurrency;
 
 import com.diegchav.staywise.api.dto.CreateBookingRequest;
+import com.diegchav.staywise.constant.DockerImages;
 import com.diegchav.staywise.domain.entity.Hotel;
 import com.diegchav.staywise.domain.entity.RoomType;
 import com.diegchav.staywise.repository.BookingRepository;
@@ -8,17 +9,20 @@ import com.diegchav.staywise.repository.HotelRepository;
 import com.diegchav.staywise.repository.RoomInventoryRepository;
 import com.diegchav.staywise.repository.RoomTypeRepository;
 import com.diegchav.staywise.service.BookingOrchestratorService;
+import com.diegchav.staywise.service.BookingService;
+import com.diegchav.staywise.service.IdempotencyService;
 import com.diegchav.staywise.testdata.TestDataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.time.LocalDate;
@@ -26,10 +30,13 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
+@DataJpaTest
+@Import({BookingOrchestratorService.class, BookingService.class, IdempotencyService.class})
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 @Testcontainers
 class BookingConcurrencyIntegrationTest {
     private static final int INVENTORY_DAYS = 1;
@@ -38,19 +45,8 @@ class BookingConcurrencyIntegrationTest {
     @Container
     @ServiceConnection
     static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
+            new PostgreSQLContainer<>(DockerImageName.parse(DockerImages.POSTGRES))
                     .withDatabaseName("staywise");
-
-    @Container
-    @ServiceConnection
-    static KafkaContainer kafka = new  KafkaContainer(DockerImageName.parse("apache/kafka:3.9.2"));
-
-    @Container
-    @ServiceConnection
-    static ElasticsearchContainer elasticsearch =
-            new ElasticsearchContainer(DockerImageName.parse("elasticsearch:8.19.12"))
-                    .withEnv("discovery.type", "single-node")
-                    .withEnv("xpack.security.enabled", "false");
 
     @Autowired
     BookingOrchestratorService bookingService;
@@ -71,12 +67,7 @@ class BookingConcurrencyIntegrationTest {
     private RoomType roomType;
 
     @BeforeEach
-    void setupInventory() {
-        bookingRepo.deleteAll();
-        inventoryRepo.deleteAll();
-        roomTypeRepository.deleteAll();
-        hotelRepository.deleteAll();
-
+    void setup() {
         hotel = TestDataFactory.createHotel(hotelRepository);
         roomType = TestDataFactory.createRoomType(roomTypeRepository, hotel);
 
@@ -99,7 +90,9 @@ class BookingConcurrencyIntegrationTest {
         CountDownLatch ready = new CountDownLatch(threads);
         CountDownLatch start = new CountDownLatch(1);
 
-        Runnable task = getBookingTask(ready, start);
+        AtomicInteger successCount = new AtomicInteger(0);
+
+        Runnable task = getBookingTask(ready, start, successCount);
 
         for (int i = 0; i < threads; i++) {
             executor.submit(task);
@@ -111,12 +104,10 @@ class BookingConcurrencyIntegrationTest {
         executor.shutdown();
         executor.awaitTermination(10, TimeUnit.SECONDS);
 
-        long totalBookings = bookingRepo.count();
-
-        assertEquals(INVENTORY_AVAILABLE_ROOMS, totalBookings);
+        assertEquals(INVENTORY_AVAILABLE_ROOMS, successCount.get());
     }
 
-    private Runnable getBookingTask(CountDownLatch ready, CountDownLatch start) {
+    private Runnable getBookingTask(CountDownLatch ready, CountDownLatch start, AtomicInteger successCount) {
         return () -> {
             ready.countDown();
 
@@ -133,6 +124,7 @@ class BookingConcurrencyIntegrationTest {
 
                 bookingService.createBooking(UUID.randomUUID().toString(), bookingRequest);
 
+                successCount.incrementAndGet();
             } catch (Exception ex) {
                 // no-op
             }

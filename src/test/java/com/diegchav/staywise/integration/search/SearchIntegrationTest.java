@@ -1,56 +1,61 @@
 package com.diegchav.staywise.integration.search;
 
 import com.diegchav.staywise.api.dto.CreateHotelRequest;
+import com.diegchav.staywise.domain.document.HotelDocument;
+import com.diegchav.staywise.integration.config.TestContainersConfig;
 import com.diegchav.staywise.repository.SearchRepository;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
-import org.testcontainers.utility.DockerImageName;
 
 import java.time.Duration;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Import(TestContainersConfig.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @SpringBootTest
-@Testcontainers
 @AutoConfigureMockMvc
 public class SearchIntegrationTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse("postgres:18"))
-            .withDatabaseName("staywise");
-
-    @Container
-    @ServiceConnection
-    static KafkaContainer kafka =
-            new KafkaContainer(DockerImageName.parse("apache/kafka:3.9.2"));
-
-    @Container
-    @ServiceConnection
-    static ElasticsearchContainer elasticsearch =
-            new ElasticsearchContainer(DockerImageName.parse("elasticsearch:8.19.12"))
-                    .withEnv("discovery.type", "single-node")
-                    .withEnv("xpack.security.enabled", "false");
+    private static final String TEST_INDEX = "hotels-test-" + UUID.randomUUID();
+    private static final String TEST_GROUP = "test-group-" + UUID.randomUUID();
 
     @Autowired
-    private SearchRepository repository;
+    private SearchRepository searchRepository;
+
+    @Autowired
+    private ElasticsearchOperations operations;
 
     @Autowired
     private WebTestClient webTestClient;
 
-    @AfterEach
-    void teardown() {
-        repository.deleteAll();
+    @DynamicPropertySource
+    static void dynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("app.hotels.search.index", () -> TEST_INDEX);
+        registry.add("app.hotels.events.group", () -> TEST_GROUP);
+    }
+
+    @BeforeEach
+    void setup() {
+        IndexOperations indexOps = operations.indexOps(HotelDocument.class);
+
+        if (indexOps.exists()) {
+            indexOps.delete();
+        }
+
+        indexOps.create();
+        indexOps.putMapping();
     }
 
     @Test
@@ -60,7 +65,9 @@ public class SearchIntegrationTest {
 
         Awaitility.await()
                 .atMost(Duration.ofSeconds(10))
-                .untilAsserted(() -> assertEquals(2, repository.count()));
+                .untilAsserted(() -> {
+                    assertEquals(2, searchRepository.count());
+                });
 
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -83,7 +90,7 @@ public class SearchIntegrationTest {
         Awaitility.await()
                 .atMost(Duration.ofSeconds(10))
                 .untilAsserted(() ->
-                        assertEquals(3, repository.count())
+                        assertEquals(3, searchRepository.count())
                 );
 
         webTestClient.get()
@@ -107,7 +114,9 @@ public class SearchIntegrationTest {
 
         Awaitility.await()
                 .atMost(Duration.ofSeconds(10))
-                .untilAsserted(() -> assertEquals(2, repository.count()));
+                .untilAsserted(() -> {
+                    assertEquals(2, searchRepository.count());
+                });
 
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder

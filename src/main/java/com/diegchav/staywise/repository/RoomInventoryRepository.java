@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface RoomInventoryRepository extends JpaRepository<RoomInventory, RoomInventoryId> {
     boolean existsById(RoomInventoryId id);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
         UPDATE
             room_inventory
@@ -90,7 +90,7 @@ public interface RoomInventoryRepository extends JpaRepository<RoomInventory, Ro
     """)
     List<RoomInventory> lockInventory(UUID roomTypeId, LocalDate startDate, LocalDate endDate);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
         UPDATE
             room_inventory
