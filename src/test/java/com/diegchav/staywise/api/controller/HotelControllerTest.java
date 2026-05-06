@@ -2,6 +2,7 @@ package com.diegchav.staywise.api.controller;
 
 import com.diegchav.staywise.api.dto.CreateHotelRequest;
 import com.diegchav.staywise.api.dto.UpdateHotelRequest;
+import com.diegchav.staywise.config.SecurityConfig;
 import com.diegchav.staywise.exception.HotelNotFoundException;
 import com.diegchav.staywise.exception.HotelUpdateException;
 import com.diegchav.staywise.service.HotelService;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(HotelController.class)
+@Import(SecurityConfig.class)
 class HotelControllerTest {
     @Autowired
     private MockMvc mockMvc;
