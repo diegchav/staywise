@@ -5,6 +5,9 @@ app:
       group: hotel-service
     search:
       index: hotels
+  jwt:
+    secret: ${JWT_SECRET:my-very-secret-key-that-is-at-least-32-characters-long}
+    expiration: ${JWT_EXPIRATION:86400000} # 24 hours
 
 spring:
   application:
